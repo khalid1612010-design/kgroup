@@ -143,7 +143,7 @@
                                 <div class="device-screen screen-showcase">
                                     <div class="screen-banner">
                                         <div class="screen-media">
-                                            <img src="https://images.pexels.com/photos/6786610/pexels-photo-6786610.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200" alt="K GROUP showcase" loading="eager">
+                                            <img src="https://images.pexels.com/photos/6786610/pexels-photo-6786610.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200" alt="Kaizen showcase" loading="eager">
                                         </div>
                                         <div class="screen-copy">
                                             <span class="screen-label">K GROUP</span>
@@ -272,15 +272,15 @@
             <section id="clients" class="section-block clients-section">
                 <div class="container">
                     <div class="section-head center-head">
-                        <span class="section-eyebrow">العملاء السابقون</span>
-                        <h2>براندات تعاملنا معها</h2>
-                        <p>مجموعة من العلامات التجارية التي تشرفنا بالعمل معها سابقًا.</p>
+                        <span class="section-eyebrow" data-i18n="clients.eyebrow">العملاء السابقون</span>
+                        <h2 data-i18n="clients.title">براندات تعاملنا معها</h2>
+                        <p data-i18n="clients.subtitle">مجموعة من العلامات التجارية التي تشرفنا بالعمل معها سابقًا.</p>
                     </div>
                     <div id="clients-grid" class="clients-grid"></div>
                     <div id="clients-empty" class="empty-state hidden">
                         <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
-                        <h3>لا توجد شعارات مضافة حاليًا.</h3>
-                        <p>يمكنك إضافة شعارات العملاء من لوحة الإدارة.</p>
+                        <h3 data-i18n="clients.emptyTitle">لا توجد شعارات مضافة حاليًا.</h3>
+                        <p data-i18n="clients.emptyText">يمكنك إضافة شعارات العملاء من لوحة الإدارة.</p>
                     </div>
                 </div>
             </section>
@@ -367,7 +367,7 @@
                     <button class="admin-nav-btn active" data-tab="products" type="button"><i class="fa-solid fa-cubes"></i><span data-i18n="admin.productsTab">إدارة المنتجات</span></button>
                     <button class="admin-nav-btn" data-tab="categories" type="button"><i class="fa-solid fa-tags"></i><span data-i18n="admin.categoriesTab">إدارة الأقسام</span></button>
                     <button class="admin-nav-btn" data-tab="portfolio" type="button"><i class="fa-solid fa-images"></i><span data-i18n="admin.portfolioTab">إدارة الأعمال</span></button>
-                    <button class="admin-nav-btn" data-tab="clients" type="button"><i class="fa-solid fa-building"></i><span>العملاء السابقون</span></button>
+                    <button class="admin-nav-btn" data-tab="clients" type="button"><i class="fa-solid fa-building"></i><span data-i18n="admin.clientsTab">العملاء السابقون</span></button>
                     <button class="admin-nav-btn" data-tab="users" type="button"><i class="fa-solid fa-users"></i><span data-i18n="admin.usersTab">حسابات المستخدمين</span></button>
                     <button class="admin-nav-btn" data-tab="orders" type="button"><i class="fa-solid fa-bag-shopping"></i><span data-i18n="admin.ordersTab">طلبات الشراء</span></button>
                 </nav>
@@ -461,7 +461,7 @@
                     <div class="admin-section-head">
                         <div>
                             <h2 data-i18n="admin.portfolioTitle">إدارة الأعمال السابقة</h2>
-                            <p>أضف صورة العمل وحدد القسم المرتبط بها.</p>
+                            <p data-i18n="admin.portfolioSimpleSubtitle">أضف صورة العمل وحدد القسم المرتبط بها.</p>
                         </div>
                         <button id="open-add-portfolio" class="primary-btn small-btn" type="button" onclick="window.openPortfolioAdminModal && window.openPortfolioAdminModal()">
                             <i class="fa-solid fa-plus"></i>
@@ -479,19 +479,19 @@
                 <section id="admin-tab-clients" class="admin-tab">
                     <div class="admin-section-head">
                         <div>
-                            <h2>إدارة العملاء السابقون</h2>
-                            <p>أضف شعارات أو صور البراندات التي تعاملتم معها سابقًا.</p>
+                            <h2 data-i18n="admin.clientsTitle">إدارة العملاء السابقون</h2>
+                            <p data-i18n="admin.clientsSubtitle">أضف شعارات أو صور البراندات التي تعاملتم معها سابقًا.</p>
                         </div>
                         <button id="open-add-client" class="primary-btn small-btn" type="button" onclick="window.openClientLogoModal && window.openClientLogoModal()">
                             <i class="fa-solid fa-plus"></i>
-                            <span>إضافة عميل</span>
+                            <span data-i18n="admin.addClient">إضافة عميل</span>
                         </button>
                     </div>
                     <div id="admin-clients-grid" class="admin-portfolio-grid"></div>
                     <div id="admin-clients-empty" class="empty-state hidden">
                         <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
-                        <h3>لا توجد شعارات عملاء.</h3>
-                        <p>أضف أول شعار عميل ليظهر في قسم العملاء السابقون.</p>
+                        <h3 data-i18n="admin.emptyClientsTitle">لا توجد شعارات عملاء.</h3>
+                        <p data-i18n="admin.emptyClientsText">أضف أول شعار عميل ليظهر في قسم العملاء السابقون.</p>
                     </div>
                 </section>
 
@@ -822,8 +822,8 @@
         <div class="modal-card modal-medium">
             <button class="modal-close" data-close="client-logo-modal" type="button"><i class="fa-solid fa-xmark"></i></button>
             <div class="modal-head">
-                <h2 id="client-logo-modal-title">إضافة عميل سابق</h2>
-                <p>أضف صورة الشعار أو صورة البراند فقط.</p>
+                <h2 id="client-logo-modal-title" data-i18n="clients.modalTitle">إضافة عميل سابق</h2>
+                <p data-i18n="clients.modalSubtitle">أضف صورة الشعار أو صورة البراند فقط.</p>
             </div>
             <form id="client-logo-form" class="modal-form">
                 <input id="client-logo-id" type="hidden">
