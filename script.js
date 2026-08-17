@@ -199,6 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'messages.invalidPhoneText': 'اكتب رقم هاتف مصري صحيح مثل 01012345678 أو +201012345678.',
       'messages.uploadErrorTitle': 'فشل رفع الصورة',
       'messages.uploadErrorText': 'تأكد من إنشاء Storage bucket باسم kgroup-media وتفعيل الصلاحيات.',
+      'messages.clientAddedTitle': 'تمت الإضافة',
+      'messages.clientAddedText': 'تمت إضافة العميل السابق بنجاح.',
       'messages.methodAddedTitle': 'تمت الإضافة',
       'messages.methodAddedText': 'تمت إضافة نوع الطباعة الجديد بنجاح.',
       'messages.duplicateMethodTitle': 'الطريقة موجودة',
@@ -289,6 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'messages.invalidPhoneText': 'Please enter a valid Egyptian phone number like 01012345678 or +201012345678.',
       'messages.uploadErrorTitle': 'Upload failed',
       'messages.uploadErrorText': 'Please create the kgroup-media storage bucket and enable the required policies.',
+      'messages.clientAddedTitle': 'Added successfully',
+      'messages.clientAddedText': 'The previous client logo has been added successfully.',
       'messages.methodAddedTitle': 'Added successfully',
       'messages.methodAddedText': 'The new print method has been added successfully.',
       'messages.duplicateMethodTitle': 'Method already exists',
@@ -717,10 +721,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!refs.productCategory || !refs.adminCategoryFilter) return;
     const selectedProductCategory = refs.productCategory.value;
     const selectedAdminCategory = refs.adminCategoryFilter.value || 'all';
+    const selectedPortfolioCategory = refs.portfolioCategory?.value || '';
 
-    refs.productCategory.innerHTML = state.categories.map(category => `
+    const categoryOptions = state.categories.map(category => `
       <option value="${category.id}">${escapeHtml(currentText(category.nameAr, category.nameEn))}</option>
     `).join('');
+
+    refs.productCategory.innerHTML = categoryOptions;
+    if (refs.portfolioCategory) refs.portfolioCategory.innerHTML = categoryOptions;
 
     refs.adminCategoryFilter.innerHTML = `
       <option value="all">${escapeHtml(t('admin.filterAllCategories'))}</option>
@@ -728,6 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     if (selectedProductCategory && state.categories.some(category => category.id === selectedProductCategory)) refs.productCategory.value = selectedProductCategory;
+    if (refs.portfolioCategory && selectedPortfolioCategory && state.categories.some(category => category.id === selectedPortfolioCategory)) refs.portfolioCategory.value = selectedPortfolioCategory;
     refs.adminCategoryFilter.value = state.categories.some(category => category.id === selectedAdminCategory) || selectedAdminCategory === 'all' ? selectedAdminCategory : 'all';
   }
 
@@ -1172,6 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!refs.detailsModal.classList.contains('hidden') && state.currentProductId) openProductDetails(state.currentProductId);
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'portfolio_items' }, loadPublicCollections)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'client_logos' }, loadPublicCollections)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'printing_methods' }, loadPrintingMethods)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_accounts' }, loadUsersAndOrders)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, loadUsersAndOrders)
@@ -1447,18 +1457,19 @@ document.addEventListener('DOMContentLoaded', () => {
       imageUrl = uploaded;
     }
 
+    const selectedCategory = getCategoryById(refs.portfolioCategory.value);
     const payload = {
       id: refs.portfolioId.value || `port-${Date.now()}`,
-      titleAr: refs.portfolioTitleAr.value.trim(),
-      titleEn: refs.portfolioTitleEn.value.trim(),
-      methodAr: refs.portfolioMethodAr.value.trim(),
-      methodEn: refs.portfolioMethodEn.value.trim(),
+      titleAr: selectedCategory?.nameAr || '',
+      titleEn: selectedCategory?.nameEn || '',
+      methodAr: selectedCategory?.nameAr || '',
+      methodEn: selectedCategory?.nameEn || '',
       image: imageUrl,
-      descriptionAr: refs.portfolioDescAr.value.trim(),
-      descriptionEn: refs.portfolioDescEn.value.trim()
+      descriptionAr: '',
+      descriptionEn: ''
     };
 
-    if (!payload.titleAr || !payload.titleEn || !payload.methodAr || !payload.methodEn || !payload.image || !payload.descriptionAr || !payload.descriptionEn) {
+    if (!payload.titleAr || !payload.titleEn || !payload.image) {
       showToast('error', t('messages.formRequiredTitle'), t('messages.formRequiredText'));
       return;
     }
@@ -1488,6 +1499,57 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPortfolio();
     renderAdminPortfolio();
     showToast('success', isEditing ? t('messages.portfolioUpdatedTitle') : t('messages.portfolioAddedTitle'), isEditing ? t('messages.portfolioUpdatedText') : t('messages.portfolioAddedText'));
+  }
+
+  async function saveClientLogoFromForm() {
+    let imageUrl = refs.clientLogoImage.value.trim();
+    const file = refs.clientLogoImageFile.files?.[0] || null;
+    if (file) {
+      const uploaded = await uploadFileToStorage(file, 'clients');
+      if (!uploaded) return;
+      imageUrl = uploaded;
+    }
+
+    const payload = {
+      id: refs.clientLogoId.value || crypto.randomUUID(),
+      image: imageUrl
+    };
+
+    if (!payload.image) {
+      showToast('error', t('messages.formRequiredTitle'), t('messages.formRequiredText'));
+      return;
+    }
+
+    const { error } = await supabaseClient.from('client_logos').upsert({
+      id: payload.id,
+      image: payload.image
+    }, { onConflict: 'id' });
+
+    if (error) {
+      showToast('error', t('messages.genericSaveError'), error.message || t('messages.genericSaveError'));
+      return;
+    }
+
+    const existingIndex = state.clientLogos.findIndex(item => item.id === payload.id);
+    if (existingIndex >= 0) state.clientLogos[existingIndex] = payload;
+    else state.clientLogos.push(payload);
+
+    closeModal(refs.clientLogoModal);
+    renderClients();
+    renderAdminClients();
+    showToast('success', t('messages.clientAddedTitle'), t('messages.clientAddedText'));
+  }
+
+  async function deleteClientLogo(clientId) {
+    const { error } = await supabaseClient.from('client_logos').delete().eq('id', clientId);
+    if (error) {
+      showToast('error', t('messages.genericSaveError'), error.message || t('messages.genericSaveError'));
+      return;
+    }
+    state.clientLogos = state.clientLogos.filter(item => item.id !== clientId);
+    renderClients();
+    renderAdminClients();
+    showToast('success', t('messages.portfolioDeletedTitle'), t('messages.portfolioDeletedText'));
   }
 
   async function saveRequestFromForm() {
@@ -1581,6 +1643,14 @@ document.addEventListener('DOMContentLoaded', () => {
     previewImageSource(refs.portfolioImagePreview, null);
   }
 
+  function resetClientLogoForm() {
+    refs.clientLogoForm.reset();
+    refs.clientLogoId.value = '';
+    refs.clientLogoImage.value = '';
+    if (refs.clientLogoImageFile) refs.clientLogoImageFile.value = '';
+    previewImageSource(refs.clientLogoImagePreview, null);
+  }
+
   function openProductModal(productId = null) {
     resetProductForm();
     populateCategorySelects();
@@ -1615,6 +1685,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openPortfolioModal(portfolioId = null) {
     resetPortfolioForm();
+    populateCategorySelects();
 
     if (portfolioId) {
       const item = state.portfolio.find(entry => entry.id === portfolioId);
@@ -1624,10 +1695,16 @@ document.addEventListener('DOMContentLoaded', () => {
       refs.portfolioTitleEn.value = item.titleEn;
       refs.portfolioMethodAr.value = item.methodAr;
       refs.portfolioMethodEn.value = item.methodEn;
-      refs.portfolioImage.value = item.image;
       refs.portfolioDescAr.value = item.descriptionAr;
       refs.portfolioDescEn.value = item.descriptionEn;
+      refs.portfolioImage.value = item.image;
       previewImageSource(refs.portfolioImagePreview, item.image);
+
+      const matchedCategory = state.categories.find(category => category.nameAr === item.titleAr || category.nameEn === item.titleEn);
+      if (matchedCategory && refs.portfolioCategory) {
+        refs.portfolioCategory.value = matchedCategory.id;
+      }
+
       refs.portfolioModalTitle.textContent = `${t('common.edit')} - ${getPortfolioTitle(item)}`;
       refs.portfolioModalSubmitLabel.textContent = t('common.update');
     } else {
@@ -1638,8 +1715,28 @@ document.addEventListener('DOMContentLoaded', () => {
     openModal(refs.portfolioModal);
   }
 
+  function openClientLogoModal(clientId = null) {
+    resetClientLogoForm();
+
+    if (clientId) {
+      const item = state.clientLogos.find(entry => entry.id === clientId);
+      if (!item) return;
+      refs.clientLogoId.value = item.id;
+      refs.clientLogoImage.value = item.image;
+      previewImageSource(refs.clientLogoImagePreview, item.image);
+      refs.clientLogoModalTitle.textContent = `${t('common.edit')} Client`;
+      refs.clientLogoSubmitLabel.textContent = t('common.update');
+    } else {
+      refs.clientLogoModalTitle.textContent = 'إضافة عميل سابق';
+      refs.clientLogoSubmitLabel.textContent = t('common.save');
+    }
+
+    openModal(refs.clientLogoModal);
+  }
+
   window.openProductAdminModal = openProductModal;
   window.openPortfolioAdminModal = openPortfolioModal;
+  window.openClientLogoModal = openClientLogoModal;
 
   function bindEvents() {
     document.addEventListener('click', async event => {
@@ -1655,6 +1752,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (target.matches('#open-add-portfolio')) {
         event.preventDefault();
         openPortfolioModal();
+        return;
+      }
+
+      if (target.matches('#open-add-client')) {
+        event.preventDefault();
+        openClientLogoModal();
         return;
       }
 
@@ -1679,6 +1782,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (target.matches('.delete-portfolio')) {
         event.preventDefault();
         showConfirm(t('messages.deletePortfolioConfirmTitle'), t('messages.deletePortfolioConfirmText'), async () => deletePortfolio(target.dataset.id));
+        return;
+      }
+
+      if (target.matches('.edit-client')) {
+        event.preventDefault();
+        openClientLogoModal(target.dataset.id);
+        return;
+      }
+
+      if (target.matches('.delete-client')) {
+        event.preventDefault();
+        showConfirm(t('messages.deletePortfolioConfirmTitle'), t('messages.deletePortfolioConfirmText'), async () => deleteClientLogo(target.dataset.id));
         return;
       }
 
@@ -1847,11 +1962,13 @@ document.addEventListener('DOMContentLoaded', () => {
         refs.adminNavBtns.forEach(item => item.classList.toggle('active', item === button));
         refs.adminTabs.forEach(tab => tab.classList.toggle('active', tab.id === `admin-tab-${state.activeAdminTab}`));
         if (state.activeAdminTab === 'users' || state.activeAdminTab === 'orders') loadUsersAndOrders();
+        if (state.activeAdminTab === 'clients') renderAdminClients();
       });
     });
 
     refs.openAddProduct?.addEventListener('click', () => openProductModal());
     refs.openAddPortfolio?.addEventListener('click', () => openPortfolioModal());
+    refs.openAddClient?.addEventListener('click', () => openClientLogoModal());
     refs.adminProductSearch?.addEventListener('input', renderAdminProducts);
     refs.adminCategoryFilter?.addEventListener('change', renderAdminProducts);
     refs.addPrintingMethodBtn?.addEventListener('click', addPrintingMethod);
@@ -1867,6 +1984,10 @@ document.addEventListener('DOMContentLoaded', () => {
     refs.portfolioForm?.addEventListener('submit', async event => {
       event.preventDefault();
       await savePortfolioFromForm();
+    });
+    refs.clientLogoForm?.addEventListener('submit', async event => {
+      event.preventDefault();
+      await saveClientLogoFromForm();
     });
 
     refs.confirmCancel?.addEventListener('click', () => {
@@ -1895,6 +2016,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bindFilePreview(refs.productImageFile, refs.productImagePreview);
     bindFilePreview(refs.productPortfolioImageFile, refs.productPortfolioImagePreview);
     bindFilePreview(refs.portfolioImageFile, refs.portfolioImagePreview);
+    bindFilePreview(refs.clientLogoImageFile, refs.clientLogoImagePreview);
   }
 
   function showSupabaseWarning(error) {
