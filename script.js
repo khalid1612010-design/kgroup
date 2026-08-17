@@ -121,8 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const translations = {
     ar: {
-      title: 'K GROUP | متجر الطباعة الاحترافي',
-      description: 'K GROUP لحلول الطباعة المخصصة والمنتجات الدعائية.',
+      title: 'kaizen | متجر الطباعة الاحترافي',
+      description: 'kaizen لحلول الطباعة المخصصة والمنتجات الدعائية.',
+      'nav.clients': 'العملاء السابقون',
       'hero.titleLine1': 'مش مجرد منتج',
       'hero.titleLine2': 'دي بصمة براندك',
       'hero.description': 'اختار من مجموعة متنوعة من المنتجات الدعائية والهدايا المخصصة، واضف لمستك الخاصة علشان كل منتج يوصل رسالة براندك ويخليه ديما في ذهن عملائك.',
@@ -210,8 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'common.guest': 'زائر'
     },
     en: {
-      title: 'K GROUP | Professional Printing Store',
-      description: 'K GROUP for custom printing and promotional products.',
+      title: 'kaizen | Professional Printing Store',
+      description: 'kaizen for custom printing and promotional products.',
+      'nav.clients': 'Previous Clients',
       'hero.titleLine1': 'Not just a product',
       'hero.titleLine2': 'it is your brand signature',
       'hero.description': 'Choose from a wide variety of promotional products and custom gifts, then add your own touch so every item carries your brand message and stays in your customers’ minds.',
@@ -313,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     printingMethods: [...DEFAULT_PRINTING_METHODS],
     products: [...DEFAULT_PRODUCTS],
     portfolio: [...DEFAULT_PORTFOLIO],
+    clientLogos: [],
     users: [],
     orders: [],
     warningShown: false,
@@ -361,6 +364,8 @@ document.addEventListener('DOMContentLoaded', () => {
     productsEmptyText: document.getElementById('products-empty-text'),
     portfolioGrid: document.getElementById('portfolio-grid'),
     portfolioEmpty: document.getElementById('portfolio-empty'),
+    clientsGrid: document.getElementById('clients-grid'),
+    clientsEmpty: document.getElementById('clients-empty'),
     detailsModal: document.getElementById('details-modal'),
     quoteModal: document.getElementById('quote-modal'),
     signupModal: document.getElementById('signup-modal'),
@@ -414,8 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
     categoryNameEn: document.getElementById('category-name-en'),
     adminCategoriesBody: document.getElementById('admin-categories-body'),
     openAddPortfolio: document.getElementById('open-add-portfolio'),
+    openAddClient: document.getElementById('open-add-client'),
     adminPortfolioGrid: document.getElementById('admin-portfolio-grid'),
     adminPortfolioEmpty: document.getElementById('admin-portfolio-empty'),
+    adminClientsGrid: document.getElementById('admin-clients-grid'),
+    adminClientsEmpty: document.getElementById('admin-clients-empty'),
     adminUsersBody: document.getElementById('admin-users-body'),
     adminUsersEmpty: document.getElementById('admin-users-empty'),
     adminOrdersBody: document.getElementById('admin-orders-body'),
@@ -451,11 +459,20 @@ document.addEventListener('DOMContentLoaded', () => {
     portfolioTitleEn: document.getElementById('portfolio-title-en'),
     portfolioMethodAr: document.getElementById('portfolio-method-ar'),
     portfolioMethodEn: document.getElementById('portfolio-method-en'),
+    portfolioCategory: document.getElementById('portfolio-category'),
     portfolioImage: document.getElementById('portfolio-image'),
     portfolioImageFile: document.getElementById('portfolio-image-file'),
     portfolioImagePreview: document.getElementById('portfolio-image-preview'),
     portfolioDescAr: document.getElementById('portfolio-desc-ar'),
     portfolioDescEn: document.getElementById('portfolio-desc-en'),
+    clientLogoModal: document.getElementById('client-logo-modal'),
+    clientLogoForm: document.getElementById('client-logo-form'),
+    clientLogoModalTitle: document.getElementById('client-logo-modal-title'),
+    clientLogoSubmitLabel: document.getElementById('client-logo-submit-label'),
+    clientLogoId: document.getElementById('client-logo-id'),
+    clientLogoImage: document.getElementById('client-logo-image'),
+    clientLogoImageFile: document.getElementById('client-logo-image-file'),
+    clientLogoImagePreview: document.getElementById('client-logo-image-preview'),
     confirmTitle: document.getElementById('confirm-title'),
     confirmMessage: document.getElementById('confirm-message'),
     confirmCancel: document.getElementById('confirm-cancel'),
@@ -787,15 +804,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refs.portfolioEmpty.classList.add('hidden');
     refs.portfolioGrid.innerHTML = state.portfolio.map(item => `
-      <article class="portfolio-card">
+      <article class="portfolio-card simple-portfolio-card">
         <div class="portfolio-media">
           <img src="${escapeHtml(item.image)}" alt="${escapeHtml(getPortfolioTitle(item))}" loading="lazy">
-          <span class="portfolio-method">${escapeHtml(getPortfolioMethod(item))}</span>
+          <span class="portfolio-method">${escapeHtml(getPortfolioTitle(item))}</span>
         </div>
-        <div class="portfolio-body">
-          <h3>${escapeHtml(getPortfolioTitle(item))}</h3>
-          <p>${escapeHtml(getPortfolioDescription(item))}</p>
-        </div>
+      </article>
+    `).join('');
+  }
+
+  function renderClients() {
+    if (!refs.clientsGrid || !refs.clientsEmpty) return;
+    if (!state.clientLogos.length) {
+      refs.clientsGrid.innerHTML = '';
+      refs.clientsEmpty.classList.remove('hidden');
+      return;
+    }
+
+    refs.clientsEmpty.classList.add('hidden');
+    refs.clientsGrid.innerHTML = state.clientLogos.map(item => `
+      <article class="client-logo-card">
+        <img src="${escapeHtml(item.image)}" alt="Client logo" loading="lazy">
       </article>
     `).join('');
   }
@@ -863,8 +892,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <img src="${escapeHtml(item.image)}" alt="${escapeHtml(getPortfolioTitle(item))}">
         <div class="admin-portfolio-body">
           <h3>${escapeHtml(getPortfolioTitle(item))}</h3>
-          <span class="admin-portfolio-meta">${escapeHtml(getPortfolioMethod(item))}</span>
-          <p>${escapeHtml(getPortfolioDescription(item))}</p>
         </div>
         <div class="admin-portfolio-actions">
           <button class="ghost-btn small-btn edit-portfolio" type="button" data-id="${item.id}"><i class="fa-solid fa-pen"></i>${escapeHtml(t('common.edit'))}</button>
@@ -873,6 +900,26 @@ document.addEventListener('DOMContentLoaded', () => {
       </article>
     `).join('');
 
+  }
+
+  function renderAdminClients() {
+    if (!refs.adminClientsGrid || !refs.adminClientsEmpty) return;
+    if (!state.clientLogos.length) {
+      refs.adminClientsGrid.innerHTML = '';
+      refs.adminClientsEmpty.classList.remove('hidden');
+      return;
+    }
+
+    refs.adminClientsEmpty.classList.add('hidden');
+    refs.adminClientsGrid.innerHTML = state.clientLogos.map(item => `
+      <article class="admin-portfolio-card">
+        <img src="${escapeHtml(item.image)}" alt="Client logo">
+        <div class="admin-portfolio-actions">
+          <button class="ghost-btn small-btn edit-client" type="button" data-id="${item.id}"><i class="fa-solid fa-pen"></i>${escapeHtml(t('common.edit'))}</button>
+          <button class="danger-btn small-btn delete-client" type="button" data-id="${item.id}"><i class="fa-solid fa-trash"></i>${escapeHtml(t('common.delete'))}</button>
+        </div>
+      </article>
+    `).join('');
   }
 
   function renderAdminUsers() {
@@ -1000,6 +1047,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  function mapClientLogoRow(row) {
+    return {
+      id: row.id,
+      image: row.image,
+      createdAt: row.created_at
+    };
+  }
+
   async function uploadFileToStorage(file, folder) {
     if (!file || !supabaseClient) return null;
     const safeName = file.name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9._-]/g, '');
@@ -1031,23 +1086,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadPublicCollections() {
-    const [categories, products, portfolio] = await Promise.all([
+    const [categories, products, portfolio, clientLogos] = await Promise.all([
       safeSelect('categories', mapCategoryRow, DEFAULT_CATEGORIES),
       safeSelect('products', mapProductRow, DEFAULT_PRODUCTS),
-      safeSelect('portfolio_items', mapPortfolioRow, DEFAULT_PORTFOLIO)
+      safeSelect('portfolio_items', mapPortfolioRow, DEFAULT_PORTFOLIO),
+      safeSelect('client_logos', mapClientLogoRow, [])
     ]);
 
     state.categories = categories.length ? categories : DEFAULT_CATEGORIES;
     if (!state.categories.some(item => item.id === 'other')) state.categories.push({ id: 'other', nameAr: 'أخرى', nameEn: 'Other' });
     state.products = products;
     state.portfolio = portfolio;
+    state.clientLogos = clientLogos;
     populateCategorySelects();
     renderCategoryPills();
     renderProducts();
     renderPortfolio();
+    renderClients();
     renderAdminProducts();
     renderAdminCategories();
     renderAdminPortfolio();
+    renderAdminClients();
   }
 
   async function loadUsersAndOrders() {
