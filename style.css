@@ -4,27 +4,27 @@
    ========================================================= */
 
 :root {
-    --bg: #f3f9fd;
-    --bg-soft: #fbfeff;
-    --surface: rgba(255, 255, 255, 0.84);
+    --bg: #f8fafc;
+    --bg-soft: #ffffff;
+    --surface: rgba(255, 255, 255, 0.88);
     --surface-solid: #ffffff;
-    --surface-dark: #0e4870;
-    --surface-dark-2: #15639a;
-    --text: #12384e;
-    --text-soft: #5f7f95;
-    --text-invert: #f7fbff;
-    --line: rgba(14, 72, 112, 0.1);
-    --line-strong: rgba(14, 72, 112, 0.18);
-    --accent: #67bbe9;
-    --accent-strong: #15639a;
-    --accent-soft: rgba(103, 187, 233, 0.17);
-    --teal: #15639a;
-    --teal-soft: #2c78ae;
+    --surface-dark: #0E4E8F;
+    --surface-dark-2: #0b4379;
+    --text: #103d6b;
+    --text-soft: #5f7691;
+    --text-invert: #fdfefe;
+    --line: rgba(14, 78, 143, 0.12);
+    --line-strong: rgba(14, 78, 143, 0.22);
+    --accent: #F5B01C;
+    --accent-strong: #d89a12;
+    --accent-soft: rgba(245, 176, 28, 0.18);
+    --teal: #0E4E8F;
+    --teal-soft: #2364a7;
     --success: #1f9d75;
     --danger: #d45858;
-    --shadow-sm: 0 6px 16px rgba(15, 71, 109, 0.08);
-    --shadow-md: 0 18px 40px rgba(15, 71, 109, 0.13);
-    --shadow-lg: 0 28px 70px rgba(15, 71, 109, 0.18);
+    --shadow-sm: 0 6px 16px rgba(14, 78, 143, 0.09);
+    --shadow-md: 0 18px 40px rgba(14, 78, 143, 0.14);
+    --shadow-lg: 0 28px 70px rgba(14, 78, 143, 0.18);
     --blur: blur(18px);
     --radius-sm: 12px;
     --radius-md: 18px;
@@ -205,20 +205,42 @@ textarea {
 
 .brand-logo-wrap {
     min-width: 0;
+    gap: 0.85rem;
 }
 
 .brand-logo {
-    width: 190px;
-    height: auto;
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
     display: block;
+    flex-shrink: 0;
+}
+
+.brand-word {
+    font-size: 1.75rem;
+    line-height: 1;
+    font-weight: 900;
+    color: var(--surface-dark);
+    letter-spacing: 0.01em;
 }
 
 .footer-brand-logo {
-    width: 220px;
+    width: 66px;
+    height: 66px;
+}
+
+.footer-brand-word {
+    color: #fff;
 }
 
 .admin-brand-logo {
-    width: 180px;
+    width: 56px;
+    height: 56px;
+}
+
+.admin-brand-word {
+    color: #fff;
+    font-size: 1.55rem;
 }
 
 .admin-mini-badge {
@@ -1753,7 +1775,16 @@ html[dir="ltr"] .brand {
     }
 
     .brand-logo {
-        width: 150px;
+        width: 48px;
+        height: 48px;
+    }
+
+    .brand-word {
+        font-size: 1.35rem;
+    }
+
+    .admin-brand-word {
+        font-size: 1.2rem;
     }
 
     .method-adder {
