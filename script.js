@@ -577,6 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchTerm: '',
     currentProductId: null,
     currentRequestMode: 'quote',
+    selectedPortfolioCategory: 'gifts',
     adminAuthenticated: sessionStorage.getItem(STORAGE_KEYS.adminAuth) === 'true',
     activeAdminTab: 'products',
     currentCustomer: null,
@@ -633,6 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
     productsEmptyText: document.getElementById('products-empty-text'),
     portfolioGrid: document.getElementById('portfolio-grid'),
     portfolioEmpty: document.getElementById('portfolio-empty'),
+    portfolioCategoryPills: document.getElementById('portfolio-category-pills'),
     clientsGrid: document.getElementById('clients-grid'),
     clientsEmpty: document.getElementById('clients-empty'),
     detailsModal: document.getElementById('details-modal'),
@@ -961,6 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buildPrintingMethodCheckboxes(getSelectedMethodsFromForm());
     renderCategoryPills();
     renderProducts();
+    renderPortfolioCategoryPills();
     renderPortfolio();
     renderAdminProducts();
     renderAdminCategories();
@@ -1076,20 +1079,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   }
 
+  function renderPortfolioCategoryPills() {
+    if (!refs.portfolioCategoryPills) return;
+    refs.portfolioCategoryPills.innerHTML = PORTFOLIO_CATEGORIES.map(category => `
+      <button class="category-pill ${state.selectedPortfolioCategory === category.id ? 'active' : ''}" data-portfolio-category="${category.id}">
+        ${escapeHtml(currentText(category.nameAr, category.nameEn))}
+      </button>
+    `).join('');
+
+    refs.portfolioCategoryPills.querySelectorAll('[data-portfolio-category]').forEach(button => {
+      button.addEventListener('click', () => {
+        state.selectedPortfolioCategory = button.dataset.portfolioCategory;
+        renderPortfolioCategoryPills();
+        renderPortfolio();
+      });
+    });
+  }
+
   function renderPortfolio() {
     if (!refs.portfolioGrid || !refs.portfolioEmpty) return;
-    if (!state.portfolio.length) {
+
+    const filtered = state.portfolio.filter(item => {
+      const category = PORTFOLIO_CATEGORIES.find(entry => entry.nameAr === item.titleAr || entry.nameEn === item.titleEn);
+      return category ? category.id === state.selectedPortfolioCategory : false;
+    });
+
+    if (!filtered.length) {
       refs.portfolioGrid.innerHTML = '';
       refs.portfolioEmpty.classList.remove('hidden');
       return;
     }
 
     refs.portfolioEmpty.classList.add('hidden');
-    refs.portfolioGrid.innerHTML = state.portfolio.map(item => `
+    refs.portfolioGrid.innerHTML = filtered.map(item => `
       <article class="portfolio-card simple-portfolio-card">
         <div class="portfolio-media">
           <img src="${escapeHtml(item.image)}" alt="${escapeHtml(getPortfolioTitle(item))}" loading="lazy">
-          <span class="portfolio-method">${escapeHtml(getPortfolioTitle(item))}</span>
         </div>
       </article>
     `).join('');
@@ -1383,6 +1408,7 @@ document.addEventListener('DOMContentLoaded', () => {
     populateCategorySelects();
     renderCategoryPills();
     renderProducts();
+    renderPortfolioCategoryPills();
     renderPortfolio();
     renderClients();
     renderAdminProducts();
