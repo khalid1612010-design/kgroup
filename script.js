@@ -263,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'clients.emptyText': 'يمكنك إضافة شعارات العملاء من لوحة الإدارة.',
       'clients.modalTitle': 'إضافة عميل سابق',
       'clients.modalSubtitle': 'أضف صورة الشعار أو صورة البراند فقط.',
+      'clients.imageLabel': 'صورة العميل',
       'hero.titleLine1': 'مش مجرد منتج',
       'hero.titleLine2': 'دي بصمة براندك',
       'hero.description': 'اختار من مجموعة متنوعة من المنتجات الدعائية والهدايا المخصصة، واضف لمستك الخاصة علشان كل منتج يوصل رسالة براندك ويخليه ديما في ذهن عملائك.',
@@ -358,6 +359,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'nav.products': 'Products',
       'nav.portfolio': 'Previous Work',
       'nav.clients': 'Previous Clients',
+      'clients.imageLabel': 'Client Image',
+      'clients.modalTitle': 'Add Previous Client',
+      'clients.modalSubtitle': 'Add the logo or brand image only.',
       'auth.signup': 'Create Account',
       'auth.login': 'Login',
       'auth.logout': 'Logout',
@@ -482,6 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'common.cancel': 'Cancel',
       'common.confirm': 'Confirm',
       'clients.eyebrow': 'Previous Clients',
+      'hero.titleLine1': 'Not just a product',
       'hero.titleLine2': 'it is your brand signature',
       'hero.description': 'Choose from a wide variety of promotional products and custom gifts, then add your own touch so every item carries your brand message and stays in your customers’ minds.',
       'products.all': 'All',
@@ -725,6 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
     portfolioForm: document.getElementById('portfolio-form'),
     portfolioModalTitle: document.getElementById('portfolio-modal-title'),
     portfolioModalSubmitLabel: document.getElementById('portfolio-modal-submit-label'),
+    portfolioSaveBtn: document.getElementById('portfolio-save-btn'),
     portfolioId: document.getElementById('portfolio-id'),
     portfolioTitleAr: document.getElementById('portfolio-title-ar'),
     portfolioTitleEn: document.getElementById('portfolio-title-en'),
@@ -1362,17 +1368,33 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function uploadFileToStorage(file, folder) {
-    if (!file || !supabaseClient) return null;
+    if (!file) return null;
+
+    if (!supabaseClient) {
+      return await fileToDataUrl(file);
+    }
+
     const safeName = file.name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9._-]/g, '');
     const filePath = `${folder}/${Date.now()}-${safeName}`;
     const { error } = await supabaseClient.storage.from(MEDIA_BUCKET).upload(filePath, file, { upsert: true });
+
     if (error) {
-      showToast('error', t('messages.uploadErrorTitle'), error.message || t('messages.uploadErrorText'));
-      return null;
+      console.warn('Storage upload failed, falling back to base64 image storage:', error.message);
+      return await fileToDataUrl(file);
     }
+
     const { data } = supabaseClient.storage.from(MEDIA_BUCKET).getPublicUrl(filePath);
-    return data?.publicUrl || null;
+    return data?.publicUrl || await fileToDataUrl(file);
   }
 
   async function safeSelect(tableName, mapper, fallback = []) {
@@ -1757,6 +1779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const selectedCategory = getPortfolioCategoryById(refs.portfolioCategory.value);
+    const selectedPortfolioCategoryId = refs.portfolioCategory.value;
     const payload = {
       id: refs.portfolioId.value || `port-${Date.now()}`,
       titleAr: selectedCategory?.nameAr || '',
@@ -1794,7 +1817,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (existingIndex >= 0) state.portfolio[existingIndex] = payload;
     else state.portfolio.push(payload);
 
+    state.selectedPortfolioCategory = selectedPortfolioCategoryId;
     closeModal(refs.portfolioModal);
+    renderPortfolioCategoryPills();
     renderPortfolio();
     renderAdminPortfolio();
     showToast('success', isEditing ? t('messages.portfolioUpdatedTitle') : t('messages.portfolioAddedTitle'), isEditing ? t('messages.portfolioUpdatedText') : t('messages.portfolioAddedText'));
@@ -2036,6 +2061,14 @@ document.addEventListener('DOMContentLoaded', () => {
   window.openProductAdminModal = openProductModal;
   window.openPortfolioAdminModal = openPortfolioModal;
   window.openClientLogoModal = openClientLogoModal;
+  window.submitPortfolioWorkForm = async () => {
+    try {
+      await savePortfolioFromForm();
+    } catch (error) {
+      console.error(error);
+      showToast('error', t('messages.genericSaveError'), error?.message || t('messages.genericSaveError'));
+    }
+  };
 
   function bindEvents() {
     document.addEventListener('click', async event => {

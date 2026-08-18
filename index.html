@@ -815,7 +815,7 @@
                 </div>
                 <div class="form-actions">
                     <button class="ghost-btn small-btn" data-close="portfolio-modal" type="button"><span data-i18n="common.cancel">إلغاء</span></button>
-                    <button class="primary-btn small-btn" type="submit"><span id="portfolio-modal-submit-label" data-i18n="common.save">حفظ</span></button>
+                    <button id="portfolio-save-btn" class="primary-btn small-btn" type="submit"><span id="portfolio-modal-submit-label" data-i18n="common.save">حفظ</span></button>
                 </div>
             </form>
         </div>
@@ -831,10 +831,10 @@
             <form id="client-logo-form" class="modal-form">
                 <input id="client-logo-id" type="hidden">
                 <div class="form-group">
-                    <label for="client-logo-image-file">صورة العميل</label>
+                    <label for="client-logo-image-file" data-i18n="clients.imageLabel">صورة العميل</label>
                     <input id="client-logo-image-file" type="file" accept="image/*">
                     <input id="client-logo-image" type="hidden">
-                    <p class="field-note">اختر صورة من جهازك. عند التعديل يمكنك ترك الحقل فارغًا للاحتفاظ بالصورة الحالية.</p>
+                    <p class="field-note" data-i18n="forms.fileNote">اختر صورة من جهازك. عند التعديل يمكنك ترك الحقل فارغًا للاحتفاظ بالصورة الحالية.</p>
                     <img id="client-logo-image-preview" class="upload-preview hidden" alt="Client logo preview">
                 </div>
                 <div class="form-actions">
