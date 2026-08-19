@@ -940,6 +940,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function initRevealAnimations() {
+    const revealItems = document.querySelectorAll('.reveal');
+    if (!revealItems.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    revealItems.forEach((item) => observer.observe(item));
+  }
+
   function applyTranslations() {
     document.documentElement.lang = state.language;
     document.documentElement.dir = state.language === 'ar' ? 'rtl' : 'ltr';
@@ -952,6 +968,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-i18n]').forEach(element => {
       const value = getTranslation(element.dataset.i18n);
       if (value !== null) element.textContent = value;
+    });
+
+    document.querySelectorAll('[data-ar][data-en]').forEach(element => {
+      element.textContent = state.language === 'ar' ? element.dataset.ar : element.dataset.en;
     });
 
     document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
@@ -979,6 +999,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!refs.detailsModal.classList.contains('hidden') && state.currentProductId) openProductDetails(state.currentProductId);
     if (!refs.quoteModal.classList.contains('hidden') && state.currentProductId) prepareQuoteModal(state.currentProductId, state.currentRequestMode);
+    initRevealAnimations();
   }
 
   function buildPrintingMethodCheckboxes(selectedMethods = []) {
@@ -2048,10 +2069,10 @@ document.addEventListener('DOMContentLoaded', () => {
       refs.clientLogoId.value = item.id;
       refs.clientLogoImage.value = item.image;
       previewImageSource(refs.clientLogoImagePreview, item.image);
-      refs.clientLogoModalTitle.textContent = `${t('common.edit')} Client`;
+      refs.clientLogoModalTitle.textContent = state.language === 'ar' ? 'تعديل عميل سابق' : 'Edit Previous Client';
       refs.clientLogoSubmitLabel.textContent = t('common.update');
     } else {
-      refs.clientLogoModalTitle.textContent = 'إضافة عميل سابق';
+      refs.clientLogoModalTitle.textContent = t('clients.modalTitle');
       refs.clientLogoSubmitLabel.textContent = t('common.save');
     }
 
