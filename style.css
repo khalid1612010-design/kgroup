@@ -545,7 +545,7 @@ textarea {
     inset-inline-start: 0;
     top: 60px;
     width: 72%;
-    background: #161b1f;
+    background: linear-gradient(180deg, #10365f, #0E4E8F);
     border-radius: 20px 20px 14px 14px;
     padding: 10px 10px 16px;
 }
@@ -558,7 +558,7 @@ textarea {
     transform: translateX(-50%);
     width: 115%;
     height: 14px;
-    background: linear-gradient(180deg, #d7d4d0, #bbb8b3);
+    background: linear-gradient(180deg, #F5B01C, #d89a12);
     border-radius: 0 0 18px 18px;
 }
 
@@ -566,7 +566,7 @@ textarea {
     inset-inline-end: 6%;
     top: 0;
     width: 34%;
-    background: #111416;
+    background: linear-gradient(180deg, #10365f, #0E4E8F);
     border-radius: 22px;
     padding: 12px;
 }
@@ -575,7 +575,7 @@ textarea {
     inset-inline-end: 0;
     bottom: 30px;
     width: 18%;
-    background: #111416;
+    background: linear-gradient(180deg, #10365f, #0E4E8F);
     border-radius: 26px;
     padding: 9px;
 }
@@ -585,14 +585,14 @@ textarea {
 }
 
 .device-screen {
-    background: #edf1f3;
+    background: #eef6fc;
     border-radius: 12px;
     overflow: hidden;
 }
 
 .screen-showcase {
     padding: 0.8rem;
-    background: linear-gradient(180deg, #6f8791 0%, #59707b 100%);
+    background: linear-gradient(180deg, #2c6fa5 0%, #0E4E8F 100%);
 }
 
 .screen-banner {
@@ -679,6 +679,80 @@ textarea {
 .feature-strip {
     margin-top: -1rem;
     padding-bottom: 1.5rem;
+}
+
+.services-section {
+    padding-top: 1.5rem;
+}
+
+.services-intro-text {
+    color: var(--text-soft);
+    font-size: 1rem;
+    line-height: 1.9;
+    max-width: 980px;
+    margin-inline: auto;
+}
+
+.services-intro-text + .services-intro-text {
+    margin-top: 1rem;
+}
+
+.services-intro-text.emphasis {
+    font-weight: 700;
+    color: var(--surface-dark);
+}
+
+.services-subhead {
+    margin-top: 2rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.service-card {
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(255,255,255,0.55);
+    border-radius: 22px;
+    box-shadow: var(--shadow-sm);
+    padding: 1.15rem 1rem;
+    text-align: center;
+    transition: var(--trans);
+}
+
+.service-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: var(--shadow-md);
+}
+
+.service-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 0.9rem;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(14, 78, 143, 0.12), rgba(245, 176, 28, 0.16));
+    font-size: 1.7rem;
+}
+
+.service-card h3 {
+    font-size: 0.96rem;
+    line-height: 1.5;
+    color: var(--surface-dark);
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .feature-strip-grid {
@@ -1034,7 +1108,7 @@ textarea {
 
 /* Footer */
 .site-footer {
-    background: linear-gradient(180deg, #31454f, #293942);
+    background: linear-gradient(180deg, #0f4f8f, #0b3f72);
     color: rgba(255,255,255,0.88);
     margin-top: 2rem;
 }
@@ -1085,7 +1159,7 @@ textarea {
 
 /* Admin */
 .admin-header {
-    background: linear-gradient(135deg, #344953, #24343c);
+    background: linear-gradient(135deg, #0E4E8F, #0b3f72);
     color: #fff;
     position: sticky;
     top: 0;
@@ -1822,6 +1896,14 @@ html[dir="ltr"] .brand {
 @media (max-width: 680px) {
     .section-block {
         padding: 4.2rem 0;
+    }
+
+    .services-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .service-card h3 {
+        font-size: 0.9rem;
     }
 
     .brand-logo {
